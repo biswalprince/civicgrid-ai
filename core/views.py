@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 
 from .models import CitizenRequest
 from .serializers import CitizenRequestSerializer
@@ -13,6 +13,72 @@ def health_check(request):
     return Response({
         "status": "ok",
         "service": "civicgrid-backend",
+    })
+
+
+@api_view(["POST"])
+def calculate_priority(request, request_id):
+    """Calculate and save a priority score for a citizen request."""
+
+    try:
+        citizen_request = CitizenRequest.objects.get(id=request_id)
+    except CitizenRequest.DoesNotExist:
+        return Response(
+            {"error": "Citizen request not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    required_fields = [
+        "severity",
+        "affected_population",
+        "infrastructure_gap",
+        "vulnerability",
+    ]
+
+    scores = {}
+
+    for field in required_fields:
+        value = request.data.get(field)
+
+        if isinstance(value, bool) or not isinstance(value, int):
+            return Response(
+                {
+                    "error": f"{field} must be an integer between 0 and 10."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if value < 0 or value > 10:
+            return Response(
+                {
+                    "error": f"{field} must be an integer between 0 and 10."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        scores[field] = value
+
+    priority_score = (
+        scores["severity"] * 4
+        + scores["affected_population"] * 3
+        + scores["infrastructure_gap"] * 2
+        + scores["vulnerability"]
+    )
+
+    if priority_score < 30:
+        recommendation = "Low priority infrastructure request"
+    elif priority_score < 60:
+        recommendation = "Medium priority infrastructure request"
+    else:
+        recommendation = "High priority infrastructure request"
+
+    citizen_request.priority_score = priority_score
+    citizen_request.save(update_fields=["priority_score"])
+
+    return Response({
+        "request_id": citizen_request.id,
+        "priority_score": priority_score,
+        "recommendation": recommendation,
     })
 
 
