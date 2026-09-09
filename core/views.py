@@ -83,5 +83,22 @@ def calculate_priority(request, request_id):
 
 
 class CitizenRequestViewSet(viewsets.ModelViewSet):
-    queryset = CitizenRequest.objects.all().order_by("-created_at")
     serializer_class = CitizenRequestSerializer
+
+    def get_queryset(self):
+        queryset = CitizenRequest.objects.all().order_by("-created_at")
+
+        category = self.request.query_params.get("category")
+        location = self.request.query_params.get("location")
+        status_filter = self.request.query_params.get("status")
+
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+
+        if status_filter:
+            queryset = queryset.filter(status__iexact=status_filter)
+
+        return queryset
