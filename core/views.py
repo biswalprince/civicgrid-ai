@@ -1,6 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status, viewsets
+from .services.gemini_service import (
+    GeminiServiceError,
+    extract_request_details,
+)
 
 from .models import CitizenRequest
 from .serializers import CitizenRequestSerializer
@@ -83,5 +87,55 @@ def calculate_priority(request, request_id):
 
 
 class CitizenRequestViewSet(viewsets.ModelViewSet):
-    queryset = CitizenRequest.objects.all().order_by("-created_at")
     serializer_class = CitizenRequestSerializer
+
+    def get_queryset(self):
+        queryset = CitizenRequest.objects.all().order_by("-created_at")
+
+        category = self.request.query_params.get("category")
+        location = self.request.query_params.get("location")
+        status_filter = self.request.query_params.get("status")
+
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+
+        if status_filter:
+            queryset = queryset.filter(status__iexact=status_filter)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        description = serializer.validated_data["description"]
+
+        try:
+            details = extract_request_details(description)
+        except GeminiServiceError as exc:
+            raise serializers.ValidationError({
+                "gemini": str(exc)
+            })
+
+        priority_score = (
+            details["severity"] * 4
+            + details["affected_population"] * 3
+            + details["infrastructure_gap"] * 2
+            + details["vulnerability"]
+        )
+
+        title = details["summary"][:200]
+
+        serializer.save(
+            title=title,
+            category=details["category"],
+            location=details["location"],
+            language=details["language"],
+            severity=details["severity"],
+            affected_population=details["affected_population"],
+            infrastructure_gap=details["infrastructure_gap"],
+            vulnerability=details["vulnerability"],
+            summary=details["summary"],
+            priority_score=priority_score,
+            status="submitted",
+        )
