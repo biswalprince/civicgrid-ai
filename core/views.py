@@ -105,6 +105,7 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
         if status_filter:
             queryset = queryset.filter(status__iexact=status_filter)
 
+
         return queryset
 
     def perform_create(self, serializer):
