@@ -4,7 +4,20 @@ CivicGrid AI is a multilingual decision-support platform for turning citizen dev
 
 ## Current development status
 
-The project currently contains only the backend foundation: Django, Django REST Framework, environment-based configuration, and a health-check endpoint. AI, maps, dashboards, authentication, and business logic are intentionally not implemented yet.
+The project currently contains a working Django REST backend with
+citizen request management, request filtering, priority scoring, and
+Gemini-powered request extraction.
+
+Citizen requests can be submitted as natural-language descriptions.
+Gemini 3.5 Flash-Lite extracts the request category, location, language,
+severity, affected population, infrastructure gap, vulnerability, and
+summary. The backend automatically calculates a priority score and
+stores the structured request data.
+
+The current implementation is focused on the backend foundation and
+AI-powered request processing. Geospatial hotspot detection,
+demographic and infrastructure datasets, policymaker dashboards,
+multilingual voice input, and cloud deployment are planned next.
 
 ## Local setup
 
