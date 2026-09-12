@@ -12,3 +12,20 @@ def normalize_location(location):
         return parts[0]
 
     return location
+
+
+LOCATION_TO_DISTRICT = {
+    "Bhubaneswar": "Khordha",
+    "Cuttack": "Cuttack",
+    "Puri": "Puri",
+    "Berhampur": "Ganjam",
+    "Sundargarh": "Sundargarh",
+}
+
+
+def get_district_for_location(location):
+    """Return the district name for a normalized location."""
+
+    normalized_location = normalize_location(location)
+
+    return LOCATION_TO_DISTRICT.get(normalized_location)

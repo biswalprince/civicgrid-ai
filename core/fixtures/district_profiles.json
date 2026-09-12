@@ -1,0 +1,77 @@
+[
+  {
+    "model": "core.districtprofile",
+    "pk": 1,
+    "fields": {
+      "district_name": "Khordha",
+      "state": "Odisha",
+      "population": 2251673,
+      "households": 0,
+      "urban_population": 1084316,
+      "rural_population": 1167357,
+      "literacy_rate": 86.88,
+      "sc_population": 0,
+      "st_population": 0
+    }
+  },
+  {
+    "model": "core.districtprofile",
+    "pk": 2,
+    "fields": {
+      "district_name": "Cuttack",
+      "state": "Odisha",
+      "population": 2624470,
+      "households": 0,
+      "urban_population": 736047,
+      "rural_population": 1888423,
+      "literacy_rate": 85.5,
+      "sc_population": 0,
+      "st_population": 0
+    }
+  },
+  {
+    "model": "core.districtprofile",
+    "pk": 3,
+    "fields": {
+      "district_name": "Puri",
+      "state": "Odisha",
+      "population": 1698730,
+      "households": 0,
+      "urban_population": 264930,
+      "rural_population": 1433800,
+      "literacy_rate": 78.13,
+      "sc_population": 0,
+      "st_population": 0
+    }
+  },
+  {
+    "model": "core.districtprofile",
+    "pk": 4,
+    "fields": {
+      "district_name": "Ganjam",
+      "state": "Odisha",
+      "population": 3529031,
+      "households": 0,
+      "urban_population": 768001,
+      "rural_population": 2761030,
+      "literacy_rate": 71.88,
+      "sc_population": 0,
+      "st_population": 0
+    }
+  },
+  {
+    "model": "core.districtprofile",
+    "pk": 5,
+    "fields": {
+      "district_name": "Sundargarh",
+      "state": "Odisha",
+      "population": 2093437,
+      "households": 0,
+      "urban_population": 738097,
+      "rural_population": 1355340,
+      "literacy_rate": 74.13,
+      "sc_population": 0,
+      "st_population": 0
+    }
+  }
+]

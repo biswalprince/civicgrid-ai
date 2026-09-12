@@ -6,9 +6,11 @@ from .services.gemini_service import (
     GeminiServiceError,
     extract_request_details,
 )
-from .services.location_service import normalize_location
-
-from .models import CitizenRequest
+from .services.location_service import (
+    normalize_location,
+    get_district_for_location,
+)
+from .models import CitizenRequest, DistrictProfile
 from .serializers import CitizenRequestSerializer
 
 
@@ -170,10 +172,22 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
 
         title = details["summary"][:200]
 
+        normalized_location = normalize_location(details["location"])
+
+        district_name = get_district_for_location(normalized_location)
+
+        district = None
+
+        if district_name:
+            district = DistrictProfile.objects.filter(
+                district_name=district_name
+            ).first()
+
         serializer.save(
             title=title,
             category=details["category"],
-            location=normalize_location(details["location"]),
+            location=normalized_location,
+            district=district,
             language=details["language"],
             severity=details["severity"],
             affected_population=details["affected_population"],
@@ -183,4 +197,3 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
             priority_score=priority_score,
             status="submitted",
         )
-
