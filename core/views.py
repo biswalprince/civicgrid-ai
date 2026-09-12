@@ -6,6 +6,7 @@ from .services.gemini_service import (
     GeminiServiceError,
     extract_request_details,
 )
+from .services.location_service import normalize_location
 
 from .models import CitizenRequest
 from .serializers import CitizenRequestSerializer
@@ -172,7 +173,7 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
         serializer.save(
             title=title,
             category=details["category"],
-            location=details["location"],
+            location=normalize_location(details["location"]),
             language=details["language"],
             severity=details["severity"],
             affected_population=details["affected_population"],
