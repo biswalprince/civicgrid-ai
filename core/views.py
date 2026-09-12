@@ -1,6 +1,7 @@
+from django.db.models import Avg, Sum, Count
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import serializers, status, viewsets
 from .services.gemini_service import (
     GeminiServiceError,
     extract_request_details,
@@ -85,6 +86,47 @@ def calculate_priority(request, request_id):
         "recommendation": recommendation,
     })
 
+@api_view(["GET"])
+def demand_hotspots(request):
+    """Return infrastructure demand aggregated by location."""
+
+    hotspots = (
+        CitizenRequest.objects
+        .values("location")
+        .annotate(
+            request_count=Count("id"),
+            average_priority_score=Avg("priority_score"),
+            average_severity=Avg("severity"),
+            total_affected_population=Sum("affected_population"),
+        )
+        .order_by("-average_priority_score")
+    )
+
+    results = []
+
+    for hotspot in hotspots:
+        average_priority = hotspot["average_priority_score"] or 0
+
+        if average_priority < 30:
+            demand_level = "LOW"
+        elif average_priority < 60:
+            demand_level = "MEDIUM"
+        else:
+            demand_level = "HIGH"
+
+        results.append({
+            "location": hotspot["location"],
+            "request_count": hotspot["request_count"],
+            "average_priority_score": round(average_priority, 2),
+            "average_severity": round(hotspot["average_severity"] or 0, 2),
+            "total_affected_population": (
+                hotspot["total_affected_population"] or 0
+            ),
+            "demand_level": demand_level,
+        })
+
+    return Response(results)
+
 
 class CitizenRequestViewSet(viewsets.ModelViewSet):
     serializer_class = CitizenRequestSerializer
@@ -140,3 +182,4 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
             priority_score=priority_score,
             status="submitted",
         )
+

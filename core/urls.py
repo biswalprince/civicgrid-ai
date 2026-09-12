@@ -1,6 +1,11 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-
+from .views import(
+    CitizenRequestViewSet,
+    calculate_priority,
+    demand_hotspots,
+    health_check,
+)
 from .views import (
     CitizenRequestViewSet,
     calculate_priority,
@@ -23,5 +28,6 @@ urlpatterns = [
         calculate_priority,
         name="calculate-priority",
     ),
+    path("hotspots/", demand_hotspots, name="demand-hotspots"),
     path("", include(router.urls)),
 ]
