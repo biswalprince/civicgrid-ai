@@ -24,6 +24,7 @@ class CitizenRequestSerializer(serializers.ModelSerializer):
             details=details,
             district=obj.district,
         )
+    
     class Meta:
         model = CitizenRequest
         fields = "__all__"
