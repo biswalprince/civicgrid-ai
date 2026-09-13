@@ -1,63 +1,109 @@
-# CivicGrid AI Backend
+Yeah bro 😭 let's keep it short, clean, and professional. This is the version I'd actually put on GitHub:
+# CivicGrid AI
 
-CivicGrid AI is a multilingual decision-support platform for turning citizen development requests into evidence-based infrastructure investment priorities. The first planned use case is water infrastructure, with an architecture intended to grow into other public-service domains.
+> **Turning citizen needs into smarter infrastructure investment decisions.**
 
-## Current development status
+CivicGrid AI is a multilingual AI-powered decision-support platform that transforms citizen infrastructure requests into evidence-based priorities for public investment.
 
-The project currently contains a working Django REST backend with
-citizen request management, request filtering, priority scoring, and
-Gemini-powered request extraction.
+It is **not a chatbot or complaint-management system**. The goal is to help policymakers understand **where infrastructure demand is highest, who is affected, and where limited resources should be invested first.**
 
-Citizen requests can be submitted as natural-language descriptions.
-Gemini 3.5 Flash-Lite extracts the request category, location, language,
-severity, affected population, infrastructure gap, vulnerability, and
-summary. The backend automatically calculates a priority score and
-stores the structured request data.
+---
 
-The current implementation is focused on the backend foundation and
-AI-powered request processing. Geospatial hotspot detection,
-demographic and infrastructure datasets, policymaker dashboards,
-multilingual voice input, and cloud deployment are planned next.
+## 🚀 How It Works
 
-## Local setup
+```text
+Citizen Request
+      ↓
+Gemini AI
+      ↓
+Structured Data
+      ↓
+Location + District Context
+      ↓
+Priority Scoring
+      ↓
+Demand Hotspots
+      ↓
+Future: Project Recommendations
 
-1. Create and activate a virtual environment:
+Gemini extracts:
+- Category
+- Location
+- Language
+- Severity
+- Population impact
+- Infrastructure gap
+- Vulnerability
+- Summary
+The backend then enriches the request with district-level demographic context and calculates a priority score.
+📊 Current Features
+- 🤖 Gemini-powered request extraction
+- 📍 Location normalization & district mapping
+- 🏘️ District demographic context
+- 📈 Context-aware priority scoring
+- 🗺️ Demand hotspot aggregation
+- 🔌 Django REST APIs
+- 🧪 Django test framework
+Priority Model
+Severity              × 4
+Affected Population   × 3
+Infrastructure Gap    × 2
+Vulnerability         × 1
+Priority levels:
+< 30       LOW
+30 – 59    MEDIUM
+60+        HIGH
+🛠️ Tech Stack
+Backend: Python · Django · Django REST Framework · SQLite
+AI: Google Gemini · google-genai
+Development: Git · GitHub · PowerShell
+Planned: Google Cloud Run · BigQuery · Firebase · Maps
+⚙️ Run Locally
+git clone https://github.com/biswalprince/civicgrid-ai.git
+cd civicgrid-ai
 
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+py -m venv venv
+.\venv\Scripts\Activate.ps1
 
-2. Install dependencies:
+pip install -r requirements.txt
 
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-3. Create your local environment file:
-
-   ```powershell
-   Copy-Item .env.example .env
-   ```
-
-4. Replace `DJANGO_SECRET_KEY` in `.env` with a secure random value before using the project outside local development.
-
-5. Apply database migrations:
-
-   ```powershell
-   py manage.py migrate
-   ```
-
-## Run the server
-
-```powershell
+Copy-Item .env.example .env
+Add your Gemini API key to .env, then:
+py manage.py migrate
 py manage.py runserver
-```
-
-The health endpoint is available at <http://127.0.0.1:8000/api/health/>.
-
-## Run tests
-
-```powershell
+API:
+http://127.0.0.1:8000/
+Health check:
+http://127.0.0.1:8000/api/health/
+Run tests:
 py manage.py test
-```
+🗺️ Roadmap
+- Gemini request extraction
+- Priority scoring
+- District demographic context
+- Demand hotspots
+- Explainable scoring
+- Infrastructure datasets
+- AI project recommendations
+- Policymaker dashboard
+- Multilingual & voice input
+- Cloud deployment
+- Expansion to more regions and infrastructure domains
+🌍 Vision
+Citizen Needs
+      +
+Public Data
+      +
+AI
+      ↓
+Infrastructure Intelligence
+      ↓
+Better Investment Decisions
+      ↓
+Better Public Services
+CivicGrid AI aims to build a scalable decision-support layer between citizen needs and public infrastructure investment.
+🚧 Status
+Active Development
+Currently focused on the Django backend and AI-powered decision-support foundation.
+👨‍💻 Author
+Prince Biswal
