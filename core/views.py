@@ -12,6 +12,7 @@ from .services.location_service import (
 )
 from .models import CitizenRequest, DistrictProfile
 from .serializers import CitizenRequestSerializer
+from .services.priority_service import calculate_priority_score
 
 
 @api_view(["GET"])
@@ -161,14 +162,7 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
         except GeminiServiceError as exc:
             raise serializers.ValidationError({
                 "gemini": str(exc)
-            })
-
-        priority_score = (
-            details["severity"] * 4
-            + details["affected_population"] * 3
-            + details["infrastructure_gap"] * 2
-            + details["vulnerability"]
-        )
+            })      
 
         title = details["summary"][:200]
 
@@ -182,6 +176,11 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
             district = DistrictProfile.objects.filter(
                 district_name=district_name
             ).first()
+
+        priority_score = calculate_priority_score(
+                    details=details,
+                    district=district,
+                )
 
         serializer.save(
             title=title,
