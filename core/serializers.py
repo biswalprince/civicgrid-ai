@@ -8,6 +8,23 @@ class CitizenRequestSerializer(serializers.ModelSerializer):
         source="district.district_name",
         read_only=True,
     )
+    priority_breakdown = serializers.SerializerMethodField()
+
+    def get_priority_breakdown(self, obj):
+        from .services.priority_service import get_priority_breakdown
+
+        details = {
+            "severity": obj.severity,
+            "affected_population": obj.affected_population,
+            "infrastructure_gap": obj.infrastructure_gap,
+            "vulnerability": obj.vulnerability,
+        }
+
+        return get_priority_breakdown(
+            details=details,
+            district=obj.district,
+        )
+    
     class Meta:
         model = CitizenRequest
         fields = "__all__"

@@ -26,10 +26,45 @@ def calculate_context_multiplier(district):
     return round(multiplier, 2)
 
 
-def calculate_priority_score(details, district=None):
-    base_score = calculate_base_priority(details)
+def get_priority_breakdown(details, district=None):
+    severity_score = details["severity"] * 4
+    affected_population_score = details["affected_population"] * 3
+    infrastructure_gap_score = details["infrastructure_gap"] * 2
+    vulnerability_score = details["vulnerability"]
+
+    base_score = (
+        severity_score
+        + affected_population_score
+        + infrastructure_gap_score
+        + vulnerability_score
+    )
+
     context_multiplier = calculate_context_multiplier(district)
+    final_score = round(base_score * context_multiplier)
 
-    final_score = base_score * context_multiplier
+    if final_score < 30:
+        priority_level = "LOW"
+    elif final_score < 60:
+        priority_level = "MEDIUM"
+    else:
+        priority_level = "HIGH"
 
-    return round(final_score)
+    return {
+        "severity": severity_score,
+        "affected_population": affected_population_score,
+        "infrastructure_gap": infrastructure_gap_score,
+        "vulnerability": vulnerability_score,
+        "base_score": base_score,
+        "context_multiplier": context_multiplier,
+        "final_score": final_score,
+        "priority_level": priority_level,
+    }
+
+
+def calculate_priority_score(details, district=None):
+    breakdown = get_priority_breakdown(
+        details=details,
+        district=district,
+    )
+
+    return breakdown["final_score"]
