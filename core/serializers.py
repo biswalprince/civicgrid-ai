@@ -4,6 +4,10 @@ from .models import CitizenRequest
 
 
 class CitizenRequestSerializer(serializers.ModelSerializer):
+    district_name = serializers.CharField(
+        source="district.district_name",
+        read_only=True,
+    )
     class Meta:
         model = CitizenRequest
         fields = "__all__"
