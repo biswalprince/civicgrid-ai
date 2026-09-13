@@ -1,7 +1,3 @@
-Yeah bro 😭 let's keep it short, clean, and professional. This is the version I'd actually put on GitHub:
-# CivicGrid AI
-
-> **Turning citizen needs into smarter infrastructure investment decisions.**
 
 CivicGrid AI is a multilingual AI-powered decision-support platform that transforms citizen infrastructure requests into evidence-based priorities for public investment.
 
