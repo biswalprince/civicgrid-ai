@@ -172,3 +172,108 @@ Do not include Markdown or explanations.
         raise GeminiResponseError("Gemini returned no usable response text.") from exc
 
     return _parse_response(response_text)
+
+RECOMMENDATION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "recommended_project": {"type": "string"},
+        "target_area": {"type": "string"},
+        "reason": {"type": "string"},
+        "expected_impact": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH"],
+        },
+        "implementation_priority": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH"],
+        },
+    },
+    "required": [
+        "recommended_project",
+        "target_area",
+        "reason",
+        "expected_impact",
+        "implementation_priority",
+    ],
+    "additionalProperties": False,
+}
+
+
+def generate_project_recommendation(
+    request_details: dict[str, Any],
+    priority_breakdown: dict[str, Any],
+    district_context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Generate an infrastructure project recommendation using Gemini."""
+
+    prompt = f"""
+You are an AI decision-support assistant for CivicGrid AI.
+
+Your task is to recommend a practical public infrastructure project
+based on a citizen infrastructure request and its calculated priority.
+
+Citizen request data:
+{json.dumps(request_details, indent=2)}
+
+Priority analysis:
+{json.dumps(priority_breakdown, indent=2)}
+
+District demographic context:
+{json.dumps(district_context or {}, indent=2)}
+
+Recommend ONE realistic infrastructure intervention.
+
+The recommendation must:
+- directly address the identified infrastructure problem
+- consider severity, affected population, infrastructure gap, and vulnerability
+- consider the district context when available
+- be suitable for public-sector planning
+- avoid inventing specific government schemes, budgets, or statistics
+- be concise and explainable
+
+Return only valid JSON.
+"""
+
+    client = _get_client()
+
+    try:
+        try:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_json_schema=RECOMMENDATION_SCHEMA,
+                ),
+            )
+        except httpx.HTTPError as exc:
+            raise GeminiRequestError(
+                "Gemini could not be reached. Check DNS, network access, and proxy settings."
+            ) from exc
+        except errors.APIError as exc:
+            raise GeminiRequestError(
+                "Gemini API request failed."
+            ) from exc
+    finally:
+        client.close()
+
+    try:
+        response_text = response.text
+    except (AttributeError, ValueError) as exc:
+        raise GeminiResponseError(
+            "Gemini returned no usable recommendation."
+        ) from exc
+
+    try:
+        recommendation = json.loads(response_text)
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise GeminiResponseError(
+            "Gemini returned invalid recommendation data."
+        ) from exc
+
+    if not isinstance(recommendation, dict):
+        raise GeminiResponseError(
+            "Gemini returned an invalid recommendation."
+        )
+
+    return recommendation
