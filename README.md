@@ -1,13 +1,10 @@
-Yeah bro 😭 let's keep it short, clean, and professional. This is the version I'd actually put on GitHub:
 # CivicGrid AI
 
 > **Turning citizen needs into smarter infrastructure investment decisions.**
 
 CivicGrid AI is a multilingual AI-powered decision-support platform that transforms citizen infrastructure requests into evidence-based priorities for public investment.
 
-It is **not a chatbot or complaint-management system**. The goal is to help policymakers understand **where infrastructure demand is highest, who is affected, and where limited resources should be invested first.**
-
----
+It is **not a chatbot or complaint-management system**. CivicGrid AI helps policymakers understand **where infrastructure demand is highest, who is affected, and which interventions should be prioritized.**
 
 ## 🚀 How It Works
 
@@ -24,8 +21,7 @@ Priority Scoring
       ↓
 Demand Hotspots
       ↓
-Future: Project Recommendations
-
+AI Project Recommendation
 Gemini extracts:
 - Category
 - Location
@@ -35,15 +31,17 @@ Gemini extracts:
 - Infrastructure gap
 - Vulnerability
 - Summary
-The backend then enriches the request with district-level demographic context and calculates a priority score.
+The backend enriches requests with district-level demographic context, calculates an explainable priority score, identifies demand hotspots, and generates infrastructure project recommendations.
 📊 Current Features
 - 🤖 Gemini-powered request extraction
 - 📍 Location normalization & district mapping
 - 🏘️ District demographic context
 - 📈 Context-aware priority scoring
+- 🔎 Explainable priority scoring
 - 🗺️ Demand hotspot aggregation
+- 💡 AI-generated infrastructure project recommendations
 - 🔌 Django REST APIs
-- 🧪 Django test framework
+- 🧪 Automated tests
 Priority Model
 Severity              × 4
 Affected Population   × 3
@@ -57,7 +55,6 @@ Priority levels:
 Backend: Python · Django · Django REST Framework · SQLite
 AI: Google Gemini · google-genai
 Development: Git · GitHub · PowerShell
-Planned: Google Cloud Run · BigQuery · Firebase · Maps
 ⚙️ Run Locally
 git clone https://github.com/biswalprince/civicgrid-ai.git
 cd civicgrid-ai
@@ -77,18 +74,6 @@ Health check:
 http://127.0.0.1:8000/api/health/
 Run tests:
 py manage.py test
-🗺️ Roadmap
-- Gemini request extraction
-- Priority scoring
-- District demographic context
-- Demand hotspots
-- Explainable scoring
-- Infrastructure datasets
-- AI project recommendations
-- Policymaker dashboard
-- Multilingual & voice input
-- Cloud deployment
-- Expansion to more regions and infrastructure domains
 🌍 Vision
 Citizen Needs
       +
@@ -99,11 +84,12 @@ AI
 Infrastructure Intelligence
       ↓
 Better Investment Decisions
-      ↓
-Better Public Services
 CivicGrid AI aims to build a scalable decision-support layer between citizen needs and public infrastructure investment.
 🚧 Status
 Active Development
-Currently focused on the Django backend and AI-powered decision-support foundation.
-👨‍💻 Author
+Currently focused on building the AI-powered backend and decision-support foundation.
+👨‍💻 Contributors
 Prince Biswal
+- Jagatjeet Swain
+- Abhishek Mishra
+- Shreyash Mishra
