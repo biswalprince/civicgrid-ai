@@ -62,3 +62,18 @@ class DistrictProfile(models.Model):
 
     def __str__(self):
         return f"{self.district_name}, {self.state}"
+
+
+class InfrastructureIndicator(models.Model):
+    district = models.ForeignKey(
+        DistrictProfile,
+        on_delete=models.CASCADE,
+        related_name="infrastructure_indicators",
+    )
+    category = models.CharField(max_length=100)
+    indicator = models.CharField(max_length=100)
+    value = models.FloatField()
+    unit = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.district.district_name} - {self.indicator}"
