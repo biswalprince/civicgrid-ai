@@ -5,6 +5,7 @@ from rest_framework import serializers, status, viewsets
 from .services.gemini_service import (
     GeminiServiceError,
     extract_request_details,
+    generate_project_recommendation,
 )
 from .services.location_service import (
     normalize_location,
@@ -12,7 +13,10 @@ from .services.location_service import (
 )
 from .models import CitizenRequest, DistrictProfile
 from .serializers import CitizenRequestSerializer
-from .services.priority_service import calculate_priority_score
+from .services.priority_service import (
+    calculate_priority_score,
+    get_priority_breakdown,
+)
 
 
 @api_view(["GET"])
@@ -130,6 +134,78 @@ def demand_hotspots(request):
         })
 
     return Response(results)
+
+@api_view(["POST"])
+def generate_recommendation(request, request_id):
+    """Generate an AI infrastructure project recommendation."""
+
+    try:
+        citizen_request = CitizenRequest.objects.get(id=request_id)
+    except CitizenRequest.DoesNotExist:
+        return Response(
+            {"error": "Citizen request not found."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    request_details = {
+        "category": citizen_request.category,
+        "location": citizen_request.location,
+        "language": citizen_request.language,
+        "severity": citizen_request.severity,
+        "affected_population": citizen_request.affected_population,
+        "infrastructure_gap": citizen_request.infrastructure_gap,
+        "vulnerability": citizen_request.vulnerability,
+        "summary": citizen_request.summary,
+    }
+
+    priority_breakdown = {
+    "severity": citizen_request.severity * 4,
+    "affected_population": citizen_request.affected_population * 3,
+    "infrastructure_gap": citizen_request.infrastructure_gap * 2,
+    "vulnerability": citizen_request.vulnerability,
+    "base_score": (
+        citizen_request.severity * 4
+        + citizen_request.affected_population * 3
+        + citizen_request.infrastructure_gap * 2
+        + citizen_request.vulnerability
+    ),
+    "final_score": citizen_request.priority_score,
+}
+
+    district_context = None
+
+    if citizen_request.district:
+        district = citizen_request.district
+
+        district_context = {
+            "district_name": district.district_name,
+            "state": district.state,
+            "population": district.population,
+            "households": district.households,
+            "urban_population": district.urban_population,
+            "rural_population": district.rural_population,
+            "literacy_rate": district.literacy_rate,
+            "sc_population": district.sc_population,
+            "st_population": district.st_population,
+        }
+
+    try:
+        recommendation = generate_project_recommendation(
+            request_details=request_details,
+            priority_breakdown=priority_breakdown,
+            district_context=district_context,
+        )
+    except GeminiServiceError as exc:
+        return Response(
+            {"error": str(exc)},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    return Response({
+        "request_id": citizen_request.id,
+        "priority_score": citizen_request.priority_score,
+        "recommendation": recommendation,
+    })
 
 
 class CitizenRequestViewSet(viewsets.ModelViewSet):
