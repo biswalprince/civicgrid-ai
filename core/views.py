@@ -20,6 +20,9 @@ from .serializers import (
     CitizenRequestSerializer,
     InfrastructureIndicatorSerializer,
 )
+from .services.infrastructure_service import(
+    calculate_infrastructure_gap,
+)
 from .services.priority_service import (
     calculate_priority_score,
     get_priority_breakdown,
@@ -260,6 +263,13 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
                 district_name=district_name
             ).first()
 
+        infrastructure_gap = calculate_infrastructure_gap(
+            district=district,
+            category=details["category"],
+        )
+        if infrastructure_gap is not None:
+            details["infrastructure_gap"] = infrastructure_gap
+            
         priority_score = calculate_priority_score(
                     details=details,
                     district=district,
