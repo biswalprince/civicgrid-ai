@@ -5,7 +5,8 @@ import httpx
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.urls import reverse
-
+from core.models import DistrictProfile, InfrastructureIndicator
+from core.services.infrastructure_service import calculate_infrastructure_gap
 from core.services import gemini_service
 
 
@@ -77,3 +78,67 @@ class GeminiServiceTests(APITestCase):
 
         with self.assertRaises(gemini_service.GeminiResponseError):
             gemini_service.extract_request_details("A road is damaged.")
+
+class InfrastructureGapTests(APITestCase):
+    def setUp(self):
+        self.district = DistrictProfile.objects.create(
+            district_name="Test District",
+            state="Odisha",
+            population=100000,
+        )
+
+    def test_coverage_is_converted_to_gap_score(self):
+        InfrastructureIndicator.objects.create(
+            district=self.district,
+            category="water",
+            indicator="coverage",
+            value=82,
+            unit="percent",
+        )
+
+        gap = calculate_infrastructure_gap(
+            district=self.district,
+            category="water",
+        )
+
+        self.assertEqual(gap, 2)
+
+    def test_zero_coverage_returns_maximum_gap(self):
+        InfrastructureIndicator.objects.create(
+            district=self.district,
+            category="water",
+            indicator="coverage",
+            value=0,
+            unit="percent",
+        )
+
+        gap = calculate_infrastructure_gap(
+            district=self.district,
+            category="water",
+        )
+
+        self.assertEqual(gap, 10)
+
+    def test_missing_indicator_returns_none(self):
+        gap = calculate_infrastructure_gap(
+            district=self.district,
+            category="water",
+        )
+
+        self.assertIsNone(gap)
+
+    def test_non_percentage_indicator_returns_none(self):
+        InfrastructureIndicator.objects.create(
+            district=self.district,
+            category="water",
+            indicator="coverage",
+            value=82,
+            unit="liters",
+        )
+
+        gap = calculate_infrastructure_gap(
+            district=self.district,
+            category="water",
+        )
+
+        self.assertIsNone(gap)

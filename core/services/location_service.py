@@ -16,6 +16,8 @@ def normalize_location(location):
 
 LOCATION_TO_DISTRICT = {
     "Bhubaneswar": "Khordha",
+    "Khordha": "Khordha",
+    "Khordha district": "Khordha",
     "Cuttack": "Cuttack",
     "Puri": "Puri",
     "Berhampur": "Ganjam",
@@ -28,4 +30,13 @@ def get_district_for_location(location):
 
     normalized_location = normalize_location(location)
 
-    return LOCATION_TO_DISTRICT.get(normalized_location)
+    if not normalized_location:
+        return None
+
+    normalized_location = normalized_location.strip().lower()
+
+    for location_name, district_name in LOCATION_TO_DISTRICT.items():
+        if normalized_location == location_name.lower():
+            return district_name
+
+    return None
