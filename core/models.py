@@ -74,6 +74,8 @@ class InfrastructureIndicator(models.Model):
     indicator = models.CharField(max_length=100)
     value = models.FloatField()
     unit = models.CharField(max_length=50)
+    source = models.CharField(max_length=255, blank=True)
+    data_year = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.district.district_name} - {self.indicator}"

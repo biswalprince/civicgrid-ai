@@ -1,0 +1,197 @@
+[
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 1,
+    "fields": {
+      "district": 1,
+      "category": "water",
+      "indicator": "coverage",
+      "value": 82,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 2,
+    "fields": {
+      "district": 1,
+      "category": "roads",
+      "indicator": "coverage",
+      "value": 74,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 3,
+    "fields": {
+      "district": 1,
+      "category": "sanitation",
+      "indicator": "coverage",
+      "value": 68,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 4,
+    "fields": {
+      "district": 2,
+      "category": "water",
+      "indicator": "coverage",
+      "value": 76,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 5,
+    "fields": {
+      "district": 2,
+      "category": "roads",
+      "indicator": "coverage",
+      "value": 71,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 6,
+    "fields": {
+      "district": 2,
+      "category": "sanitation",
+      "indicator": "coverage",
+      "value": 63,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 7,
+    "fields": {
+      "district": 3,
+      "category": "water",
+      "indicator": "coverage",
+      "value": 73,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 8,
+    "fields": {
+      "district": 3,
+      "category": "roads",
+      "indicator": "coverage",
+      "value": 67,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 9,
+    "fields": {
+      "district": 3,
+      "category": "sanitation",
+      "indicator": "coverage",
+      "value": 59,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 10,
+    "fields": {
+      "district": 4,
+      "category": "water",
+      "indicator": "coverage",
+      "value": 69,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 11,
+    "fields": {
+      "district": 4,
+      "category": "roads",
+      "indicator": "coverage",
+      "value": 62,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 12,
+    "fields": {
+      "district": 4,
+      "category": "sanitation",
+      "indicator": "coverage",
+      "value": 55,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 13,
+    "fields": {
+      "district": 5,
+      "category": "water",
+      "indicator": "coverage",
+      "value": 64,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 14,
+    "fields": {
+      "district": 5,
+      "category": "roads",
+      "indicator": "coverage",
+      "value": 58,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  },
+  {
+    "model": "core.infrastructureindicator",
+    "pk": 15,
+    "fields": {
+      "district": 5,
+      "category": "sanitation",
+      "indicator": "coverage",
+      "value": 51,
+      "unit": "percent",
+      "source": "Prototype government infrastructure dataset",
+      "data_year": 2011
+    }
+  }
+]
