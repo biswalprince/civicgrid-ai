@@ -11,8 +11,15 @@ from .services.location_service import (
     normalize_location,
     get_district_for_location,
 )
-from .models import CitizenRequest, DistrictProfile
-from .serializers import CitizenRequestSerializer
+from .models import (
+    CitizenRequest, 
+    DistrictProfile,
+    InfrastructureIndicator,
+)
+from .serializers import (
+    CitizenRequestSerializer,
+    InfrastructureIndicatorSerializer,
+)
 from .services.priority_service import (
     calculate_priority_score,
     get_priority_breakdown,
@@ -272,3 +279,26 @@ class CitizenRequestViewSet(viewsets.ModelViewSet):
             priority_score=priority_score,
             status="submitted",
         )
+
+class InfrastructureIndicatorViewSet(viewsets.ModelViewSet):
+    queryset = InfrastructureIndicator.objects.select_related(
+        "district"
+    ).all().order_by("district__district_name", "category", "indicator")
+
+    serializer_class = InfrastructureIndicatorSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        category = self.request.query_params.get("category")
+        district = self.request.query_params.get("district")
+
+        if category:
+            queryset = queryset.filter(category__iexact=category)
+
+        if district:
+            queryset = queryset.filter(
+                district__district_name__icontains=district
+            )
+
+        return queryset

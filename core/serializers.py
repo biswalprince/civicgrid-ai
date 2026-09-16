@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-from .models import CitizenRequest
+from .models import CitizenRequest, InfrastructureIndicator
 
 
 class CitizenRequestSerializer(serializers.ModelSerializer):
@@ -49,3 +48,14 @@ class CitizenRequestSerializer(serializers.ModelSerializer):
                 "Description cannot be empty."
             )
         return value
+
+class InfrastructureIndicatorSerializer(serializers.ModelSerializer):
+    district_name = serializers.CharField(
+        source="district.district_name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = InfrastructureIndicator
+        fields = "__all__"
+        read_only_fields = ["district_name"]
