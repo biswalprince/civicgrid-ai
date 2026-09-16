@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     CitizenRequestViewSet,
+    InfrastructureIndicatorViewSet,
     calculate_priority,
     demand_hotspots,
     generate_recommendation,
@@ -16,6 +17,12 @@ router.register(
     "requests",
     CitizenRequestViewSet,
     basename="citizen-request",
+)
+
+router.register(
+    "infrastructure-indicators",
+    InfrastructureIndicatorViewSet,
+    basename="infrastructure-indicator",
 )
 
 urlpatterns = [
