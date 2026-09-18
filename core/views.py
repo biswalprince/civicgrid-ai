@@ -199,11 +199,31 @@ def generate_recommendation(request, request_id):
             "st_population": district.st_population,
         }
 
+    infrastructure_context = []
+
+    if citizen_request.district:
+        indicators = InfrastructureIndicator.objects.filter(
+            district=citizen_request.district
+        ).order_by("category", "indicator")
+
+        infrastructure_context = [
+            {
+                "category": indicator.category,
+                "indicator": indicator.indicator,
+                "value": indicator.value,
+                "unit": indicator.unit,
+                "source": indicator.source,
+                "data_year": indicator.data_year,
+            }
+            for indicator in indicators
+        ]
+
     try:
         recommendation = generate_project_recommendation(
             request_details=request_details,
             priority_breakdown=priority_breakdown,
             district_context=district_context,
+            infrastructure_context=infrastructure_context,
         )
     except GeminiServiceError as exc:
         return Response(
