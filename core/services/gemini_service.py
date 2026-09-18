@@ -203,6 +203,7 @@ def generate_project_recommendation(
     request_details: dict[str, Any],
     priority_breakdown: dict[str, Any],
     district_context: dict[str, Any] | None = None,
+    infrastructure_context: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Generate an infrastructure project recommendation using Gemini."""
 
@@ -221,6 +222,9 @@ Priority analysis:
 District demographic context:
 {json.dumps(district_context or {}, indent=2)}
 
+Infrastructure indicators:
+{json.dumps(infrastructure_context or [], indent=2)}
+
 Recommend ONE realistic infrastructure intervention.
 
 The recommendation must:
@@ -230,6 +234,9 @@ The recommendation must:
 - be suitable for public-sector planning
 - avoid inventing specific government schemes, budgets, or statistics
 - be concise and explainable
+- use infrastructure indicators as evidence when available
+- distinguish between available infrastructure data and missing data
+- do not treat synthetic or prototype data as verified current statistics
 
 Return only valid JSON.
 """
