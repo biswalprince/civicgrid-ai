@@ -235,6 +235,9 @@ def generate_recommendation(request, request_id):
         "request_id": citizen_request.id,
         "priority_score": citizen_request.priority_score,
         "recommendation": recommendation,
+        "evidence": {
+        "infrastructure": infrastructure_context,
+        },
     })
 
 
