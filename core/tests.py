@@ -1,3 +1,4 @@
+from core.models import CitizenRequest, DistrictProfile, InfrastructureIndicator
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -142,3 +143,185 @@ class InfrastructureGapTests(APITestCase):
         )
 
         self.assertIsNone(gap)
+
+
+class CitizenRequestIntegrationTests(APITestCase):
+    def setUp(self):
+        self.district = DistrictProfile.objects.create(
+            district_name="Khordha",
+            state="Odisha",
+            population=100000,
+            households=25000,
+            urban_population=60000,
+            rural_population=40000,
+            literacy_rate=75,
+            sc_population=10000,
+            st_population=5000,
+        )
+
+        InfrastructureIndicator.objects.create(
+            district=self.district,
+            category="water",
+            indicator="coverage",
+            value=82,
+            unit="percent",
+            source="Test infrastructure dataset",
+            data_year=2011,
+        )
+
+    @patch("core.views.extract_request_details")
+    def test_request_creation_uses_infrastructure_gap(
+        self,
+        mock_extract,
+    ):
+        mock_extract.return_value = {
+            "summary": "Severe drinking water shortage in Khordha.",
+            "category": "water",
+            "location": "Khordha district",
+            "language": "English",
+            "severity": 8,
+            "affected_population": 7,
+            "infrastructure_gap": 9,
+            "vulnerability": 7,
+        }
+
+        response = self.client.post(
+            "/api/requests/",
+            {
+                "description": (
+                    "There is a severe shortage of drinking water "
+                    "in Khordha district."
+                )
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        citizen_request = CitizenRequest.objects.get(
+            id=response.json()["id"]
+        )
+
+        self.assertEqual(
+            citizen_request.district,
+            self.district,
+        )
+
+        # 82% coverage should override Gemini's gap of 9
+        self.assertEqual(
+            citizen_request.infrastructure_gap,
+            2,
+        )
+
+        # 8×4 + 7×3 + 2×2 + 7 = 64
+        # 64 × 1.05 = 67.2 → 67
+        self.assertEqual(
+            citizen_request.priority_score,
+            77,
+        )
+
+    @patch("core.views.extract_request_details")
+    def test_unknown_location_falls_back_to_gemini_gap(
+        self,
+        mock_extract,
+    ):
+        mock_extract.return_value = {
+            "summary": "Severe water shortage in an unknown location.",
+            "category": "water",
+            "location": "Unknown Village",
+            "language": "English",
+            "severity": 8,
+            "affected_population": 7,
+            "infrastructure_gap": 9,
+            "vulnerability": 7,
+        }
+
+        response = self.client.post(
+            "/api/requests/",
+            {
+                "description": "There is a severe water shortage."
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        citizen_request = CitizenRequest.objects.get(
+            id=response.json()["id"]
+        )
+
+        self.assertIsNone(citizen_request.district)
+
+        # No infrastructure indicator is available,
+        # so Gemini's value is preserved.
+        self.assertEqual(
+            citizen_request.infrastructure_gap,
+            9,
+        )
+
+    @patch("core.views.generate_project_recommendation")
+    def test_recommendation_returns_infrastructure_evidence(
+        self,
+        mock_recommendation,
+    ):
+        mock_recommendation.return_value = {
+            "recommended_project": "Rural Water Supply Expansion",
+            "target_area": "Khordha district",
+            "reason": "Water infrastructure requires improvement.",
+            "expected_impact": "HIGH",
+            "implementation_priority": "HIGH",
+        }
+
+        citizen_request = CitizenRequest.objects.create(
+            title="Water shortage",
+            description="Severe water shortage in Khordha.",
+            category="water",
+            location="Khordha district",
+            language="English",
+            severity=8,
+            affected_population=7,
+            infrastructure_gap=2,
+            vulnerability=7,
+            summary="Severe water shortage in Khordha.",
+            status="submitted",
+            priority_score=67,
+            district=self.district,
+        )
+
+        response = self.client.post(
+            f"/api/requests/{citizen_request.id}/recommend/"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        data = response.json()
+
+        self.assertIn("evidence", data)
+        self.assertIn("infrastructure", data["evidence"])
+
+        infrastructure = data["evidence"]["infrastructure"]
+
+        self.assertEqual(len(infrastructure), 1)
+
+        self.assertEqual(
+            infrastructure[0]["category"],
+            "water",
+        )
+
+        self.assertEqual(
+            infrastructure[0]["value"],
+            82.0,
+        )
+
+        self.assertEqual(
+            infrastructure[0]["source"],
+            "Test infrastructure dataset",
+        )
+
+        self.assertEqual(
+            infrastructure[0]["data_year"],
+            2011,
+        )
