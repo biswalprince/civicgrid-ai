@@ -1,9 +1,50 @@
+CATEGORY_WEIGHTS = {
+    "water": {
+        "severity": 4,
+        "affected_population": 3,
+        "infrastructure_gap": 3,
+        "vulnerability": 2,
+    },
+    "roads": {
+        "severity": 4,
+        "affected_population": 4,
+        "infrastructure_gap": 2,
+        "vulnerability": 1,
+    },
+    "sanitation": {
+        "severity": 4,
+        "affected_population": 3,
+        "infrastructure_gap": 3,
+        "vulnerability": 2,
+    },
+}
+
+DEFAULT_WEIGHTS = {
+    "severity": 4,
+    "affected_population": 3,
+    "infrastructure_gap": 2,
+    "vulnerability": 1,
+}
+
+
+def get_category_weights(category):
+    if not category:
+        return DEFAULT_WEIGHTS
+
+    return CATEGORY_WEIGHTS.get(
+        category.lower(),
+        DEFAULT_WEIGHTS,
+    )
+
+
 def calculate_base_priority(details):
+    weights = get_category_weights(details.get("category"))
+
     return (
-        details["severity"] * 4
-        + details["affected_population"] * 3
-        + details["infrastructure_gap"] * 2
-        + details["vulnerability"]
+        details["severity"] * weights["severity"]
+        + details["affected_population"] * weights["affected_population"]
+        + details["infrastructure_gap"] * weights["infrastructure_gap"]
+        + details["vulnerability"] * weights["vulnerability"]
     )
 
 
@@ -21,16 +62,31 @@ def calculate_context_multiplier(district):
         (80 - district.literacy_rate) / 20,
     )
 
-    multiplier = 1.0 + (rural_ratio * 0.1) + (literacy_disadvantage * 0.05)
+    multiplier = (
+        1.0
+        + (rural_ratio * 0.1)
+        + (literacy_disadvantage * 0.05)
+    )
 
     return round(multiplier, 2)
 
 
 def get_priority_breakdown(details, district=None):
-    severity_score = details["severity"] * 4
-    affected_population_score = details["affected_population"] * 3
-    infrastructure_gap_score = details["infrastructure_gap"] * 2
-    vulnerability_score = details["vulnerability"]
+    weights = get_category_weights(details.get("category"))
+
+    severity_score = details["severity"] * weights["severity"]
+    affected_population_score = (
+        details["affected_population"]
+        * weights["affected_population"]
+    )
+    infrastructure_gap_score = (
+        details["infrastructure_gap"]
+        * weights["infrastructure_gap"]
+    )
+    vulnerability_score = (
+        details["vulnerability"]
+        * weights["vulnerability"]
+    )
 
     base_score = (
         severity_score
@@ -50,6 +106,8 @@ def get_priority_breakdown(details, district=None):
         priority_level = "HIGH"
 
     return {
+        "category": details.get("category"),
+        "weights": weights,
         "severity": severity_score,
         "affected_population": affected_population_score,
         "infrastructure_gap": infrastructure_gap_score,
