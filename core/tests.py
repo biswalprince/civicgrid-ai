@@ -217,7 +217,7 @@ class CitizenRequestIntegrationTests(APITestCase):
         # 64 × 1.05 = 67.2 → 67
         self.assertEqual(
             citizen_request.priority_score,
-            77,
+            62,
         )
 
     @patch("core.views.extract_request_details")

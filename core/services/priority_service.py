@@ -1,19 +1,19 @@
 CATEGORY_WEIGHTS = {
     "water": {
         "severity": 4,
-        "affected_population": 3,
+        "affected_population": 2,
         "infrastructure_gap": 3,
-        "vulnerability": 2,
+        "vulnerability": 1,
     },
     "roads": {
-        "severity": 4,
+        "severity": 3,
         "affected_population": 4,
         "infrastructure_gap": 2,
         "vulnerability": 1,
     },
     "sanitation": {
-        "severity": 4,
-        "affected_population": 3,
+        "severity": 3,
+        "affected_population": 2,
         "infrastructure_gap": 3,
         "vulnerability": 2,
     },
@@ -96,7 +96,10 @@ def get_priority_breakdown(details, district=None):
     )
 
     context_multiplier = calculate_context_multiplier(district)
-    final_score = round(base_score * context_multiplier)
+    final_score = min(
+        100,
+        round(base_score * context_multiplier),
+    )
 
     if final_score < 30:
         priority_level = "LOW"
