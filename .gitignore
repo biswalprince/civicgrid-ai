@@ -53,3 +53,8 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# React / vite frontend
+node_modules/
+dist/
+*.local
