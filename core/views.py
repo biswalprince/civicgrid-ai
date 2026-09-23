@@ -145,6 +145,60 @@ def demand_hotspots(request):
 
     return Response(results)
 
+@api_view(["GET"])
+def dashboard_summary(request):
+    """Return aggregated data for the policymaker dashboard."""
+
+    total_requests = CitizenRequest.objects.count()
+
+    high_priority = CitizenRequest.objects.filter(
+        priority_score__gte=60
+    ).count()
+
+    infrastructure_indicators = InfrastructureIndicator.objects.count()
+
+    priority_distribution = {
+        "HIGH": CitizenRequest.objects.filter(
+            priority_score__gte=60
+        ).count(),
+        "MEDIUM": CitizenRequest.objects.filter(
+            priority_score__gte=30,
+            priority_score__lt=60,
+        ).count(),
+        "LOW": CitizenRequest.objects.filter(
+            priority_score__lt=30
+        ).count(),
+    }
+
+    location_data = (
+        CitizenRequest.objects
+        .values("location")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+
+    demand_by_location = [
+        {
+            "location": item["location"],
+            "count": item["count"],
+        }
+        for item in location_data
+    ]
+
+    demand_hotspot_count = sum(
+        1 for item in demand_by_location
+        if item["count"] >= 2
+    )
+
+    return Response({
+        "total_requests": total_requests,
+        "high_priority": high_priority,
+        "demand_hotspots": demand_hotspot_count,
+        "infrastructure_indicators": infrastructure_indicators,
+        "priority_distribution": priority_distribution,
+        "demand_by_location": demand_by_location,
+    })
+
 @api_view(["POST"])
 def generate_recommendation(request, request_id):
     """Generate an AI infrastructure project recommendation."""

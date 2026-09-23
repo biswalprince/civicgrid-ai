@@ -325,3 +325,104 @@ class CitizenRequestIntegrationTests(APITestCase):
             infrastructure[0]["data_year"],
             2011,
         )
+
+
+class DashboardSummaryTests(APITestCase):
+    def setUp(self):
+        self.district = DistrictProfile.objects.create(
+            district_name="Khordha",
+            state="Odisha",
+            population=100000,
+            households=25000,
+            urban_population=60000,
+            rural_population=40000,
+            literacy_rate=75,
+            sc_population=10000,
+            st_population=5000,
+        )
+
+        InfrastructureIndicator.objects.create(
+            district=self.district,
+            category="water",
+            indicator="coverage",
+            value=82,
+            unit="percent",
+            source="Test infrastructure dataset",
+            data_year=2011,
+        )
+
+        CitizenRequest.objects.create(
+            title="Water shortage",
+            description="Water shortage",
+            category="water",
+            location="Khordha",
+            language="English",
+            severity=8,
+            affected_population=7,
+            infrastructure_gap=2,
+            vulnerability=7,
+            summary="Water shortage",
+            status="submitted",
+            priority_score=70,
+            district=self.district,
+        )
+
+        CitizenRequest.objects.create(
+            title="Road damage",
+            description="Damaged road",
+            category="roads",
+            location="Cuttack",
+            language="English",
+            severity=5,
+            affected_population=4,
+            infrastructure_gap=3,
+            vulnerability=2,
+            summary="Damaged road",
+            status="submitted",
+            priority_score=45,
+        )
+
+        CitizenRequest.objects.create(
+            title="Minor issue",
+            description="Minor infrastructure issue",
+            category="other",
+            location="Puri",
+            language="English",
+            severity=2,
+            affected_population=1,
+            infrastructure_gap=1,
+            vulnerability=1,
+            summary="Minor issue",
+            status="submitted",
+            priority_score=20,
+        )
+
+    def test_dashboard_summary_returns_expected_aggregates(self):
+        response = self.client.get("/api/dashboard/summary/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.json()
+
+        self.assertEqual(data["total_requests"], 3)
+        self.assertEqual(data["high_priority"], 1)
+        self.assertEqual(data["demand_hotspots"], 0)
+        self.assertEqual(data["infrastructure_indicators"], 1)
+
+        self.assertEqual(
+            data["priority_distribution"],
+            {
+                "HIGH": 1,
+                "MEDIUM": 1,
+                "LOW": 1,
+            },
+        )
+
+        locations = {
+            item["location"]: item["count"]
+            for item in data["demand_by_location"]
+        }
+
+        self.assertEqual(locations["Khordha"], 1)
+        self.assertEqual(locations["Cuttack"], 1)
+        self.assertEqual(locations["Puri"], 1)

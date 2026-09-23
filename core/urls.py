@@ -9,6 +9,7 @@ from .views import (
     demand_hotspots,
     generate_recommendation,
     health_check,
+    dashboard_summary,
 )
 
 router = DefaultRouter()
@@ -39,4 +40,9 @@ urlpatterns = [
     ),
     path("hotspots/", demand_hotspots, name="demand-hotspots"),
     path("", include(router.urls)),
+    path(
+        "dashboard/summary/",
+        dashboard_summary,
+        name="dashboard-summary",
+    ),
 ]
