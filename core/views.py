@@ -203,6 +203,21 @@ def dashboard_summary(request):
         }
         for item in high_priority_by_district
     ]
+    average_priority_by_district = (
+        CitizenRequest.objects
+        .filter(district__isnull=False)
+        .values("district__district_name")
+        .annotate(average_priority=Avg("priority_score"))
+        .order_by("-average_priority")
+    )
+
+    average_priority_by_district = [
+        {
+            "district": item["district__district_name"],
+            "average_priority": round(item["average_priority"], 2),
+        }
+        for item in average_priority_by_district
+    ]
 
     district_data = (
         CitizenRequest.objects
@@ -239,6 +254,7 @@ def dashboard_summary(request):
         "demand_by_location": demand_by_location,
         "high_priority_by_category": high_priority_by_category,
         "high_priority_by_district": high_priority_by_district,
+        "average_priority_by_district": average_priority_by_district,
     })
 
 @api_view(["POST"])
