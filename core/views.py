@@ -1,4 +1,4 @@
-from django.db.models import Avg, Sum, Count, F, Value
+from django.db.models import Avg, Sum, Count, F, Value, Q
 from django.db.models.functions import Coalesce
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -218,6 +218,32 @@ def dashboard_summary(request):
         }
         for item in average_priority_by_district
     ]
+    district_impact_summary = (
+    CitizenRequest.objects
+        .filter(district__isnull=False)
+        .values("district__district_name")
+        .annotate(
+            total_requests=Count("id"),
+            high_priority=Count(
+                "id",
+                filter=Q(priority_score__gte=60),
+            ),
+            average_priority=Avg("priority_score"),
+            total_affected_population=Sum("affected_population"),
+        )
+        .order_by("-average_priority")
+    )
+
+    district_impact_summary = [
+        {
+            "district": item["district__district_name"],
+            "total_requests": item["total_requests"],
+            "high_priority": item["high_priority"],
+            "average_priority": round(item["average_priority"], 2),
+            "total_affected_population": item["total_affected_population"],
+        }
+        for item in district_impact_summary
+    ]
 
     district_data = (
         CitizenRequest.objects
@@ -255,6 +281,7 @@ def dashboard_summary(request):
         "high_priority_by_category": high_priority_by_category,
         "high_priority_by_district": high_priority_by_district,
         "average_priority_by_district": average_priority_by_district,
+        "district_impact_summary": district_impact_summary,
     })
 
 @api_view(["POST"])
