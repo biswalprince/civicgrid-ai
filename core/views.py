@@ -1,4 +1,5 @@
-from django.db.models import Avg, Sum, Count
+from django.db.models import Avg, Sum, Count, F, Value
+from django.db.models.functions import Coalesce
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers, status, viewsets
@@ -170,19 +171,25 @@ def dashboard_summary(request):
         ).count(),
     }
 
-    location_data = (
+    district_data = (
         CitizenRequest.objects
-        .values("location")
+        .annotate(
+            dashboard_location=Coalesce(
+                F("district__district_name"),
+                F("location"),
+            )
+        )
+        .values("dashboard_location")
         .annotate(count=Count("id"))
         .order_by("-count")
     )
 
     demand_by_location = [
         {
-            "location": item["location"],
+            "location": item["dashboard_location"],
             "count": item["count"],
         }
-        for item in location_data
+        for item in district_data
     ]
 
     demand_hotspot_count = sum(

@@ -368,6 +368,22 @@ class DashboardSummaryTests(APITestCase):
         )
 
         CitizenRequest.objects.create(
+            title="Bhubaneswar water shortage",
+            description="Water shortage in Bhubaneswar",
+            category="water",
+            location="Bhubaneswar",
+            language="English",
+            severity=7,
+            affected_population=6,
+            infrastructure_gap=2,
+            vulnerability=6,
+            summary="Water shortage in Bhubaneswar",
+            status="submitted",
+            priority_score=65,
+            district=self.district,
+        )
+
+        CitizenRequest.objects.create(
             title="Road damage",
             description="Damaged road",
             category="roads",
@@ -404,15 +420,15 @@ class DashboardSummaryTests(APITestCase):
 
         data = response.json()
 
-        self.assertEqual(data["total_requests"], 3)
-        self.assertEqual(data["high_priority"], 1)
-        self.assertEqual(data["demand_hotspots"], 0)
+        self.assertEqual(data["total_requests"], 4)
+        self.assertEqual(data["high_priority"], 2)
+        self.assertEqual(data["demand_hotspots"], 1)
         self.assertEqual(data["infrastructure_indicators"], 1)
 
         self.assertEqual(
             data["priority_distribution"],
             {
-                "HIGH": 1,
+                "HIGH": 2,
                 "MEDIUM": 1,
                 "LOW": 1,
             },
@@ -423,6 +439,6 @@ class DashboardSummaryTests(APITestCase):
             for item in data["demand_by_location"]
         }
 
-        self.assertEqual(locations["Khordha"], 1)
+        self.assertEqual(locations["Khordha"], 2)
         self.assertEqual(locations["Cuttack"], 1)
         self.assertEqual(locations["Puri"], 1)
