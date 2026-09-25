@@ -43,7 +43,6 @@ def health_check(request):
 @api_view(["POST"])
 def calculate_priority(request, request_id):
     """Calculate and save a priority score for a citizen request."""
-
     try:
         citizen_request = CitizenRequest.objects.get(id=request_id)
     except CitizenRequest.DoesNotExist:
@@ -82,27 +81,34 @@ def calculate_priority(request, request_id):
 
         scores[field] = value
 
-    priority_score = (
-        scores["severity"] * 4
-        + scores["affected_population"] * 3
-        + scores["infrastructure_gap"] * 2
-        + scores["vulnerability"]
+    scores["category"] = citizen_request.category
+
+    breakdown = get_priority_breakdown(
+        details=scores,
+        district=citizen_request.district,
     )
 
-    if priority_score < 30:
-        recommendation = "Low priority infrastructure request"
-    elif priority_score < 60:
-        recommendation = "Medium priority infrastructure request"
-    else:
-        recommendation = "High priority infrastructure request"
+    citizen_request.severity = scores["severity"]
+    citizen_request.affected_population = scores["affected_population"]
+    citizen_request.infrastructure_gap = scores["infrastructure_gap"]
+    citizen_request.vulnerability = scores["vulnerability"]
+    citizen_request.priority_score = breakdown["final_score"]
 
-    citizen_request.priority_score = priority_score
-    citizen_request.save(update_fields=["priority_score"])
+    citizen_request.save(
+        update_fields=[
+            "severity",
+            "affected_population",
+            "infrastructure_gap",
+            "vulnerability",
+            "priority_score",
+        ]
+    )
 
     return Response({
         "request_id": citizen_request.id,
-        "priority_score": priority_score,
-        "recommendation": recommendation,
+        "priority_score": breakdown["final_score"],
+        "priority_level": breakdown["priority_level"],
+        "priority_breakdown": breakdown,
     })
 
 @api_view(["GET"])
