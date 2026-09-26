@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, MapPinned } from 'lucide-react'
-import { getHotspots } from '../api/hotspots'
+import { getDashboardSummary } from '../api/dashboard'
 
 function demandStyle(level) {
   const styles = {
@@ -20,13 +20,28 @@ export default function Hotspots() {
   useEffect(() => {
     async function loadHotspots() {
       try {
-        const data = await getHotspots()
-        const list = Array.isArray(data) ? data : data.results ?? []
-        setHotspots(
-          [...list].sort(
-            (a, b) => b.average_priority_score - a.average_priority_score,
-          ),
-        )
+        const data = await getDashboardSummary()
+
+        const list = (data.demand_by_location ?? [])
+          .filter(
+            (item) => item.location && item.location !== 'unknown',
+          )
+          .map((item) => ({
+            location: item.location,
+            request_count: item.count,
+            average_priority_score:
+              data.average_priority_by_district?.find(
+                (district) => district.district === item.location,
+              )?.average_priority ?? 0,
+            demand_level:
+              item.count >= 5
+                ? 'HIGH'
+                : item.count >= 2
+                  ? 'MEDIUM'
+                  : 'LOW',
+          }))
+
+        setHotspots(list)
       } catch (err) {
         console.error('Unable to load hotspots:', err)
         setError('Unable to load demand hotspots. Please try again.')
@@ -38,7 +53,9 @@ export default function Hotspots() {
     loadHotspots()
   }, [])
 
-  if (loading) return <p className="text-slate-600">Loading demand hotspots…</p>
+  if (loading) {
+    return <p className="text-slate-600">Loading demand hotspots…</p>
+  }
 
   if (error) {
     return (
@@ -51,21 +68,25 @@ export default function Hotspots() {
 
   return (
     <section>
-      <p className="text-sm font-medium text-blue-700">Concentrated demand</p>
+      <p className="text-sm font-medium text-blue-700">
+        Concentrated demand
+      </p>
+
       <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
         Demand Hotspots
       </h1>
+
       <p className="mt-3 max-w-3xl text-slate-600">
-        Identify locations where multiple citizen requests indicate a concentrated
-        infrastructure need.
+        Identify locations where multiple citizen requests indicate a
+        concentrated infrastructure need.
       </p>
 
       <div className="mt-7 grid gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2">
           {hotspots.length === 0 ? (
             <div className="rounded-lg border border-slate-200 bg-white p-6 text-slate-600">
-              No demand hotspots are available yet. Add more citizen requests to
-              identify concentrated infrastructure demand.
+              No demand hotspots are available yet. Add more citizen
+              requests to identify concentrated infrastructure demand.
             </div>
           ) : (
             <div className="grid gap-5 md:grid-cols-2">
@@ -79,10 +100,16 @@ export default function Hotspots() {
                       <h2 className="text-lg font-semibold text-slate-950">
                         {hotspot.location}
                       </h2>
-                      <p className="mt-1 text-sm text-slate-500">Demand concentration</p>
+
+                      <p className="mt-1 text-sm text-slate-500">
+                        Demand concentration
+                      </p>
                     </div>
+
                     <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${demandStyle(hotspot.demand_level)}`}
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${demandStyle(
+                        hotspot.demand_level,
+                      )}`}
                     >
                       {hotspot.demand_level} DEMAND
                     </span>
@@ -93,32 +120,19 @@ export default function Hotspots() {
                       <dt className="text-xs uppercase tracking-wide text-slate-500">
                         Requests
                       </dt>
+
                       <dd className="mt-1 text-xl font-semibold text-slate-900">
                         {hotspot.request_count}
                       </dd>
                     </div>
+
                     <div>
                       <dt className="text-xs uppercase tracking-wide text-slate-500">
                         Avg. Priority
                       </dt>
+
                       <dd className="mt-1 text-xl font-semibold text-slate-900">
                         {hotspot.average_priority_score}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs uppercase tracking-wide text-slate-500">
-                        Avg. Severity
-                      </dt>
-                      <dd className="mt-1 text-xl font-semibold text-slate-900">
-                        {hotspot.average_severity}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs uppercase tracking-wide text-slate-500">
-                        Population Impact Index
-                      </dt>
-                      <dd className="mt-1 text-xl font-semibold text-slate-900">
-                        {hotspot.total_affected_population}
                       </dd>
                     </div>
                   </dl>
@@ -130,10 +144,15 @@ export default function Hotspots() {
 
         <aside className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <MapPinned className="text-blue-700" size={24} />
-          <h2 className="mt-4 font-semibold text-slate-950">District overview</h2>
+
+          <h2 className="mt-4 font-semibold text-slate-950">
+            District overview
+          </h2>
+
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Geospatial visualization is coming soon. This view does not infer or
-            display geographic coordinates without backend-provided map data.
+            Geospatial visualization is coming soon. This view does not
+            infer or display geographic coordinates without backend-provided
+            map data.
           </p>
         </aside>
       </div>
