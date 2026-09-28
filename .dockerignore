@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+civicgrid-frontend/
